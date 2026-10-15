@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krene 提示词工作台 · 自助生成器</title>
+<meta name="description" content="806 条 Krene 优秀提示词案例 + 分模型槽位生成器 + 实时体检 + 参数速查，帮你写好自己的 AI 绘画提示词。">
+<meta name="theme-color" content="#0d1219">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Krene 提示词工作台 · 自助生成器">
+<meta property="og:description" content="806 条 Krene 优秀提示词案例 + 填槽自动成稿 + 实时体检，学会自己写提示词。">
+<meta property="og:image" content="https://yunanofficial.github.io/promote_generation/img/prompt-047-d8488e9fe3.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">K</span>
+    <div>
+      <h1>Krene 提示词工作台</h1>
+      <p class="sub">填槽位 → 自动成稿 · 806 条优秀案例 · 站方参数与排错</p>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-tab="gen">生成器</button>
+    <button class="tab" data-tab="tpl">模板库</button>
+    <button class="tab" data-tab="case">案例库 <em id="caseCount"></em></button>
+    <button class="tab" data-tab="ref">速查手册</button>
+    <button class="tab" data-tab="about">说明</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ 生成器 ============ -->
+  <section class="panel on" id="panel-gen">
+    <div class="gen-grid">
+      <div class="col-left">
+        <div class="card">
+          <h2 class="card-h">① 选模型 <span class="hint">决定了用哪种语法</span></h2>
+          <div class="model-picker" id="modelPicker"></div>
+          <p class="model-tip" id="modelTip"></p>
+        </div>
+        <div class="card">
+          <h2 class="card-h">② 填槽位 <span class="hint">点右侧词库可插入到光标处</span></h2>
+          <div id="slotForm" class="slot-form"></div>
+          <div class="slot-actions">
+            <button class="btn ghost" id="btnSample">填充示例</button>
+            <button class="btn ghost" id="btnRandom">随机灵感</button>
+            <button class="btn ghost danger" id="btnClear">清空</button>
+          </div>
+        </div>
+        <div class="card" id="paramCard">
+          <h2 class="card-h">③ 参数（Niji 7 专属）</h2>
+          <div id="paramPanel"></div>
+        </div>
+      </div>
+
+      <div class="col-right">
+        <div class="card sticky">
+          <h2 class="card-h">④ 成品提示词
+            <span class="hint" id="outMeta"></span>
+          </h2>
+          <textarea id="outText" spellcheck="false" placeholder="左侧填槽位会自动生成；也可直接在这里手写/粘贴。"></textarea>
+          <div class="out-actions">
+            <button class="btn primary" id="btnCopy">复制提示词</button>
+            <button class="btn ghost" id="btnRebuild">从槽位重建</button>
+            <button class="btn ghost" id="btnSave">收藏</button>
+            <span class="lock-hint" id="lockHint"></span>
+          </div>
+          <div class="issues" id="issues"></div>
+        </div>
+        <div class="card">
+          <h2 class="card-h">词库 <span class="hint">点击插入到当前焦点框</span></h2>
+          <div class="lib-tabs" id="libTabs"></div>
+          <div class="chips" id="libChips"></div>
+        </div>
+        <div class="card">
+          <h2 class="card-h">我的收藏 <span class="hint">存在本机浏览器</span></h2>
+          <div id="favList" class="fav-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 模板库 ============ -->
+  <section class="panel" id="panel-tpl">
+    <p class="lead">六个可直接套用的骨架（来自站方公式与 806 条案例的高频结构）。点「载入生成器」把原文放进成品框，替换 <code>【】</code> 即可用。</p>
+    <div class="tpl-grid" id="tplGrid"></div>
+  </section>
+
+  <!-- ============ 案例库 ============ -->
+  <section class="panel" id="panel-case">
+    <div class="filters">
+      <input id="q" class="input" type="search" placeholder="搜索标题 / 提示词正文 / 作者…">
+      <select id="fModel" class="input"></select>
+      <select id="fColl" class="input"></select>
+      <select id="fSort" class="input">
+        <option value="rec">排序：站方推荐优先</option>
+        <option value="len-desc">排序：正文最长</option>
+        <option value="len-asc">排序：正文最短</option>
+        <option value="title">排序：标题</option>
+      </select>
+      <label class="check"><input type="checkbox" id="fFeat"> 只看首页推荐</label>
+      <label class="check"><input type="checkbox" id="fFull" checked> 只看有正文</label>
+      <span class="filters-meta" id="filterMeta"></span>
+    </div>
+    <div id="caseList" class="case-list"></div>
+    <div class="more-wrap"><button class="btn ghost" id="btnMore">加载更多</button></div>
+  </section>
+
+  <!-- ============ 速查 ============ -->
+  <section class="panel" id="panel-ref">
+    <div class="ref-grid">
+      <div class="card">
+        <h2 class="card-h">Niji 7 参数速查</h2>
+        <div id="refParams"></div>
+      </div>
+      <div class="card">
+        <h2 class="card-h">中英词库对照</h2>
+        <div id="refDict"></div>
+      </div>
+      <div class="card wide">
+        <h2 class="card-h">排错表：症状 → 原因 → 改法</h2>
+        <div id="refFix"></div>
+      </div>
+      <div class="card wide">
+        <h2 class="card-h">出图前自检清单</h2>
+        <ol class="checklist" id="refCheck"></ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 说明 ============ -->
+  <section class="panel" id="panel-about">
+    <div class="card prose">
+      <h2 class="card-h">这个站点是怎么来的</h2>
+      <p>数据来自 krene.com 公开页面与公开接口的一次完整采集：首页推荐位 100 条 + 提示词库去重后 <b>806 条逐字原文</b>（含 GPT Image-2 326、Banana Pro 系 185、Niji 7 166、GPT Image 2.5 78、即梦 3.1 50），外加站方 8 篇官方教程的参数口径。</p>
+      <p>生成器把《提示词规律总结》里的分模型槽位骨架、词频统计与《写作教程》的七步法、参数表、排错规则，做成可交互的自助工具：<b>填槽位 → 自动成稿 → 实时体检 → 复制到 Krene 出图</b>。</p>
+      <p>体检规则完全来自案例统计出的反模式（质量词堆砌、中英无分隔、参数误用、文字没逐字给出、多格没写一致性、参考图没锁身份等），不是凭空规定的。</p>
+      <p class="dim">注意：67 条 GPT Image-2 案例在站方原始数据里只存了 <code>$d1</code>/<code>$bf</code> 这类跨文件引用占位符，案例库中标记为「无正文」并给出原页链接，未做任何编造。本站为本地静态页面，数据不外传。</p>
+      <h3 style="margin:18px 0 10px;font-size:14px">配套的三份完整报告</h3>
+      <ul class="doclinks">
+        <li><a href="reports/01_总结篇_Krene优秀提示词规律.docx">01 总结篇 · 806 条提示词规律总结（DOCX）</a></li>
+        <li><a href="reports/02_教程篇_自己怎么写提示词.docx">02 教程篇 · 七步法 / 模板 / 参数 / 排错（DOCX）</a></li>
+        <li><a href="reports/03_案例库_首页推荐100条.docx">03 案例库 · 首页推荐 100 条（DOCX）</a></li>
+        <li class="dimsmall">Markdown 版：<a href="reports/01_总结篇_Krene优秀提示词规律.md">01</a> · <a href="reports/02_教程篇_自己怎么写提示词.md">02</a> · <a href="reports/03_案例库_首页推荐100条.md">03</a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="案例大图">
+  <div class="lbinner">
+    <img alt="案例原图" decoding="async">
+    <div class="lbbar">
+      <div class="lbcap"></div>
+      <div class="lbacts">
+        <button class="btn tiny" data-lbcopy>复制提示词</button>
+        <a class="btn tiny" data-lbpage target="_blank" rel="noopener">原页 ↗</a>
+        <button class="btn tiny lbclose">关闭 ✕</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
