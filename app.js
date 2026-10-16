@@ -324,8 +324,11 @@ const state = {
   slots: {},           // { modelKey: { slotKey: value } }
   verb: 'change',
   params: { stylizeOn: true, stylize: 200, chaosOn: false, chaos: 20, raw: false, srefOn: false, sref: '', sw: 600, weirdOn: false, weird: 4, no: 'text, watermark, blur, bad hands' },
-  favs: [],
+  favs: [],            // 我的词条：[{ title, text, model, at }]
+  history: [],         // 生成历史：[{ at, model, mk, text, slots, params }]
   libTab: 'style',
+  mineQ: '',
+  histQ: '',
   locked: false
 };
 function load() {
@@ -336,12 +339,16 @@ function load() {
     if (d.model && modelByKey(d.model)) state.model = d.model;
     if (d.slots) state.slots = d.slots;
     if (d.params) Object.assign(state.params, d.params);
-    if (d.favs) state.favs = d.favs;
+    if (Array.isArray(d.favs)) state.favs = d.favs;
+    if (Array.isArray(d.history)) state.history = d.history;
   } catch (e) { /* ignore */ }
 }
 function save() {
   try {
-    localStorage.setItem(LS_KEY, JSON.stringify({ model: state.model, slots: state.slots, params: state.params, favs: state.favs }));
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      model: state.model, slots: state.slots, params: state.params,
+      favs: state.favs, history: state.history
+    }));
   } catch (e) { /* ignore */ }
 }
 function slotVal(mk, sk) {
@@ -581,6 +588,7 @@ function refresh() {
     return '<div class="issue ' + w.level + '"><i>' + icon + '</i><div><b>' + label + '：' + esc(w.msg) + '</b>' +
       (w.fix ? '<br><span class="fix">' + esc(w.fix) + '</span>' : '') + '</div></div>';
   }).join('');
+  scheduleHistory();
 }
 
 /* ============================================================
@@ -590,11 +598,24 @@ function renderLibTabs() {
   const m = modelByKey(state.model);
   const useEn = m.lang === 'en';
   const keys = LIB_ORDER.filter((k) => (useEn ? LIB[k].env.length : LIB[k].zhv.length));
-  if (keys.indexOf(state.libTab) < 0) state.libTab = keys[0];
-  $('#libTabs').innerHTML = keys.map((k) => '<button class="lib-tab' + (k === state.libTab ? ' on' : '') + '" data-l="' + k + '">' + esc(useEn ? LIB[k].en : LIB[k].zh) + '</button>').join('');
+  const tabs = [{ k: 'mine', label: '我的词条' + (state.favs.length ? ' (' + state.favs.length + ')' : '') }]
+    .concat(keys.map((k) => ({ k: k, label: useEn ? LIB[k].en : LIB[k].zh })));
+  if (!tabs.some((t) => t.k === state.libTab)) state.libTab = (tabs.filter((t) => t.k !== 'mine')[0] || tabs[0]).k;
+  $('#libTabs').innerHTML = tabs.map((t) => '<button class="lib-tab' + (t.k === state.libTab ? ' on' : '') + (t.k === 'mine' ? ' mine' : '') +
+    '" data-l="' + t.k + '">' + esc(t.label) + '</button>').join('');
   $$('#libTabs .lib-tab').forEach((b) => b.onclick = () => { state.libTab = b.dataset.l; renderLibTabs(); renderChips(); });
 }
 function renderChips() {
+  if (state.libTab === 'mine') {
+    if (!state.favs.length) {
+      $('#libChips').innerHTML = '<p class="empty">还没有自己的词条。填好槽位后点成品框下的「存为词条」，它就会出现在这里，之后可一键插入到光标处。</p>';
+      return;
+    }
+    $('#libChips').innerHTML = state.favs.map((f, i) => '<button class="chip mine" data-wi="' + i + '" title="' + esc(oneLine(f.text, 140)) + '">' +
+      esc(f.title || oneLine(f.text, 18)) + '</button>').join('');
+    $$('#libChips [data-wi]').forEach((c) => c.onclick = () => { const f = state.favs[+c.dataset.wi]; if (f) insertWord(f.text); });
+    return;
+  }
   const m = modelByKey(state.model);
   const useEn = m.lang === 'en';
   const list = useEn ? LIB[state.libTab].env : LIB[state.libTab].zhv;
@@ -621,19 +642,195 @@ function insertWord(word) {
 /* ============================================================
    11. 收藏
    ============================================================ */
+function autoTitle(m, t) {
+  const s = state.slots[m.key] || {};
+  const first = m.slots.map((x) => s[x.k]).filter((v) => v && String(v).trim())[0];
+  return String(first || t.replace(/\s+/g, ' ')).slice(0, 26);
+}
+// 存一条词条（同名/同文去重，新的在最前）
+function addFav(text, title, m) {
+  const t = String(text || '').trim();
+  if (!t) return false;
+  const name = String(title || '').trim().slice(0, 40) || autoTitle(m || modelByKey(state.model), t);
+  const dup = state.favs.findIndex((f) => f.text === t);
+  if (dup > -1) state.favs.splice(dup, 1);
+  state.favs.unshift({ title: name, text: t, model: m ? m.name : '', at: Date.now() });
+  state.favs = state.favs.slice(0, 200);
+  save(); renderFavs(); renderMine(); renderLibTabs(); renderChips(); renderMineMeta();
+  return name;
+}
+function loadFavInto(f) {
+  if (!f) return;
+  const mm = modelByName(f.model);
+  if (mm) state.model = mm.key;
+  state.locked = true; renderAll(); $('#outText').value = f.text; refresh();
+  lockNote('已载入词条（手动模式，改回槽位请点「从槽位重建」）');
+  switchTab('gen'); toast('已载入词条');
+}
 function renderFavs() {
-  if (!state.favs.length) { $('#favList').innerHTML = '<p class="empty">还没有收藏。在生成器里点「收藏」保存当前提示词。</p>'; return; }
-  $('#favList').innerHTML = state.favs.map((f, i) => '<div class="fav"><span class="ft">' + esc(f.title || (f.text.slice(0, 30) + '…')) +
+  if (!state.favs.length) {
+    $('#favList').innerHTML = '<p class="empty">还没有自己的词条。填好槽位后点「存为词条」，或到「我的库」里保存当前成品；保存后这里出现，可一键插入到光标处。</p>';
+    return;
+  }
+  const show = state.favs.slice(0, 6);
+  $('#favList').innerHTML = show.map((f, i) => '<div class="fav"><span class="ft">' + esc(f.title || (f.text.slice(0, 30) + '…')) +
     '<br><span class="fm">' + esc(f.model) + '</span></span>' +
-    '<button class="btn tiny" data-load="' + i + '">载入</button><button class="btn tiny" data-copy="' + i + '">复制</button><button class="btn tiny danger" data-del="' + i + '">删</button></div>').join('');
-  $$('#favList [data-load]').forEach((b) => b.onclick = () => {
-    const f = state.favs[+b.dataset.load]; const mm = modelByName(f.model);
-    if (mm) state.model = mm.key;
-    state.locked = true; renderAll(); $('#outText').value = f.text; refresh(); lockNote('已载入收藏（手动模式）');
-    switchTab('gen'); toast('已载入');
-  });
+    '<button class="btn tiny" data-ins="' + i + '">插入</button>' +
+    '<button class="btn tiny" data-load="' + i + '">载入</button><button class="btn tiny" data-copy="' + i + '">复制</button><button class="btn tiny danger" data-del="' + i + '">删</button></div>').join('') +
+    (state.favs.length > show.length ? '<p class="empty">还有 ' + (state.favs.length - show.length) + ' 条，见「我的库」。</p>' : '');
+  $$('#favList [data-ins]').forEach((b) => b.onclick = () => insertMine(+b.dataset.ins));
+  $$('#favList [data-load]').forEach((b) => b.onclick = () => loadFavInto(state.favs[+b.dataset.load]));
   $$('#favList [data-copy]').forEach((b) => b.onclick = () => copyText(state.favs[+b.dataset.copy].text));
-  $$('#favList [data-del]').forEach((b) => b.onclick = () => { state.favs.splice(+b.dataset.del, 1); save(); renderFavs(); });
+  $$('#favList [data-del]').forEach((b) => b.onclick = () => { state.favs.splice(+b.dataset.del, 1); save(); renderFavs(); renderMine(); renderLibTabs(); renderChips(); renderMineMeta(); });
+}
+
+/* ============================================================
+   11.5 我的库：词条管理 + 生成历史
+   ============================================================ */
+function pad2(n) { return String(n).padStart(2, '0'); }
+function fmtWhen(ts) {
+  const d = new Date(ts || 0);
+  if (isNaN(d.getTime())) return '';
+  const hm = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return '今天 ' + hm;
+  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + hm;
+}
+function oneLine(t, n) { return String(t || '').replace(/\s+/g, ' ').trim().slice(0, n); }
+function renderMineMeta() {
+  const c = $('#mineCount'); if (c) c.textContent = state.favs.length ? '(' + state.favs.length + ')' : '';
+  const a = $('#mineMeta'); if (a) a.textContent = state.favs.length + ' 条 · 点「插入」写到光标处';
+  const b = $('#histMeta'); if (b) b.textContent = state.history.length + ' / 100 条 · 自动记录';
+}
+function renderMine() {
+  const box = $('#mineList'); if (!box) return;
+  const q = state.mineQ.trim().toLowerCase();
+  const rows = state.favs.map((f, i) => ({ f: f, i: i }))
+    .filter((o) => !q || ((o.f.title || '') + ' ' + o.f.text).toLowerCase().indexOf(q) > -1);
+  if (!rows.length) {
+    box.innerHTML = '<p class="empty">' + (state.favs.length ? '没有匹配的词条。' : '还没有自己的词条。在生成器里填好槽位后点「存为词条」，或改好成品框内容后点上方「保存当前成品」。') + '</p>';
+    renderMineMeta(); return;
+  }
+  box.innerHTML = rows.map((o) => {
+    const f = o.f, i = o.i;
+    return '<div class="fav col"><div class="fhead"><span class="ft">' + esc(f.title || oneLine(f.text, 30)) + '</span>' +
+      '<span class="fm">' + esc(f.model || '未知模型') + ' · ' + fmtWhen(f.at) + ' · ' + String(f.text || '').length + ' 字</span></div>' +
+      '<pre class="fp">' + esc(oneLine(f.text, 200)) + '</pre>' +
+      '<div class="fbtns"><button class="btn tiny" data-mins="' + i + '">插入到光标处</button>' +
+      '<button class="btn tiny" data-mload="' + i + '">载入生成器</button>' +
+      '<button class="btn tiny" data-mcopy="' + i + '">复制</button>' +
+      '<button class="btn tiny" data-mren="' + i + '">改名</button>' +
+      '<button class="btn tiny danger" data-mdel="' + i + '">删除</button></div></div>';
+  }).join('');
+  renderMineMeta();
+}
+function renderHistory() {
+  const box = $('#histList'); if (!box) return;
+  const q = state.histQ.trim().toLowerCase();
+  const rows = state.history.map((e, i) => ({ e: e, i: i }))
+    .filter((o) => !q || String(o.e.text || '').toLowerCase().indexOf(q) > -1);
+  if (!rows.length) {
+    box.innerHTML = '<p class="empty">' + (state.history.length ? '没有匹配的历史。' : '还没有历史。在生成器里填槽或改成品框，停手 2 秒就会自动记一条（最多留 100 条，内容相同的自动合并到最新）。') + '</p>';
+    renderMineMeta(); return;
+  }
+  box.innerHTML = rows.map((o) => {
+    const e = o.e, i = o.i;
+    return '<div class="fav col"><div class="fhead"><span class="ft">' + esc(oneLine(e.text, 46)) + '</span>' +
+      '<span class="fm">' + esc(e.model || '未知模型') + ' · ' + fmtWhen(e.at) + ' · ' + String(e.text || '').length + ' 字' +
+      (e.slots && Object.keys(e.slots).length ? ' · 含槽位' : '') + '</span></div>' +
+      '<pre class="fp">' + esc(oneLine(e.text, 240)) + '</pre>' +
+      '<div class="fbtns"><button class="btn tiny" data-hload="' + i + '">载入</button>' +
+      '<button class="btn tiny" data-hcopy="' + i + '">复制</button>' +
+      '<button class="btn tiny" data-hfav="' + i + '">存为词条</button>' +
+      '<button class="btn tiny danger" data-hdel="' + i + '">删除</button></div></div>';
+  }).join('');
+  renderMineMeta();
+}
+// 插入到光标处；没有可用光标时退化为载入生成器
+function insertMine(i) {
+  const f = state.favs[i]; if (!f) return;
+  const usable = lastFocus && document.contains(lastFocus) && lastFocus.offsetParent !== null;
+  if (usable) { switchTab('gen'); lastFocus.focus(); insertWord(f.text); }
+  else { loadFavInto(f); }
+}
+// ---- 生成历史：自动记录（防抖 2s，同文合并，上限 100）----
+let histTimer = null, histArmed = false;
+function scheduleHistory() {
+  if (!histArmed) return;
+  if (histTimer) clearTimeout(histTimer);
+  histTimer = setTimeout(() => { histTimer = null; pushHistory(); }, 2000);
+}
+function pushHistory(force) {
+  const t = $('#outText').value.trim();
+  if (!t || t.length < 8 || !/[A-Za-z\u4e00-\u9fff\u3040-\u30ff]/.test(t)) return false;
+  const m = modelByKey(state.model);
+  const h = state.history;
+  if (h.length && h[0].text === t) { h[0].at = Date.now(); h[0].model = m.name; save(); renderHistory(); return false; }
+  const old = h.findIndex((e) => e.text === t);
+  if (old > -1) h.splice(old, 1);
+  h.unshift({
+    at: Date.now(), model: m.name, mk: m.key, text: t,
+    slots: JSON.parse(JSON.stringify(state.slots[m.key] || {})),
+    params: m.syntax === 'tags' ? JSON.parse(JSON.stringify(state.params)) : null
+  });
+  state.history = h.slice(0, 100);
+  save(); renderHistory(); renderMineMeta();
+  return true;
+}
+function loadHistory(i) {
+  const e = state.history[i]; if (!e) return;
+  const mm = modelByKey(e.mk) || modelByName(e.model);
+  if (mm) {
+    state.model = mm.key;
+    if (e.slots) state.slots[mm.key] = JSON.parse(JSON.stringify(e.slots));
+    if (e.params && mm.syntax === 'tags') Object.assign(state.params, e.params);
+  }
+  state.locked = true; renderAll();
+  $('#outText').value = e.text; refresh();
+  lockNote('已载入历史（槽位一起还原，手动模式）');
+  switchTab('gen'); toast('已载入这条历史');
+}
+// ---- 导出 / 导入 ----
+function myData() {
+  return { app: 'krene-prompt-studio', v: 1, exportedAt: new Date().toISOString(), favs: state.favs, history: state.history };
+}
+function exportMy() {
+  const json = JSON.stringify(myData(), null, 2);
+  const d = new Date(), stamp = d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '-' + pad2(d.getHours()) + pad2(d.getMinutes());
+  try {
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'krene-我的词条-' + stamp + '.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('已导出 ' + state.favs.length + ' 条词条 + ' + state.history.length + ' 条历史');
+  } catch (e) { copyText(json); toast('浏览器不支持直接下载，已复制 JSON 到剪贴板'); }
+  return json;
+}
+function importMy(txt, silent) {
+  let d = null;
+  try { d = JSON.parse(txt); } catch (e) { if (!silent) toast('这个文件不是合法的 JSON'); return false; }
+  if (!d || typeof d !== 'object') { if (!silent) toast('内容里没有词条数据'); return false; }
+  const favs = Array.isArray(d) ? d : (Array.isArray(d.favs) ? d.favs : []);
+  const hist = Array.isArray(d.history) ? d.history : [];
+  let nf = 0, nh = 0;
+  favs.forEach((f) => {
+    if (!f || typeof f.text !== 'string' || !f.text.trim()) return;
+    if (state.favs.some((x) => x.text === f.text)) return;
+    state.favs.push({ title: String(f.title || '').slice(0, 40), text: f.text, model: f.model || '', at: f.at || Date.now() }); nf++;
+  });
+  hist.forEach((e) => {
+    if (!e || typeof e.text !== 'string' || !e.text.trim()) return;
+    if (state.history.some((x) => x.text === e.text)) return;
+    state.history.push(e); nh++;
+  });
+  state.favs.sort((a, b) => (b.at || 0) - (a.at || 0));
+  state.history.sort((a, b) => (b.at || 0) - (a.at || 0));
+  state.history = state.history.slice(0, 100);
+  save(); renderFavs(); renderMine(); renderHistory(); renderLibTabs(); renderChips(); renderMineMeta();
+  if (!silent) toast('导入完成：新增 ' + nf + ' 条词条 / ' + nh + ' 条历史');
+  return true;
 }
 
 /* ============================================================
@@ -778,6 +975,7 @@ function closeShot() {
 function switchTab(name) {
   $$('#tabs .tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
   $$('.panel').forEach((p) => p.classList.toggle('on', p.id === 'panel-' + name));
+  if (name === 'mine') { renderMine(); renderHistory(); renderMineMeta(); }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function renderAll() {
@@ -797,7 +995,7 @@ function init() {
   $('#lightbox').onclick = (e) => { if (e.target.id === 'lightbox' || e.target.classList.contains('lbclose')) closeShot(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeShot(); });
   // 生成器按钮
-  $('#btnCopy').onclick = () => { const t = $('#outText').value.trim(); if (!t) return toast('还没有内容'); copyText(t); };
+  $('#btnCopy').onclick = () => { const t = $('#outText').value.trim(); if (!t) return toast('还没有内容'); copyText(t); pushHistory(true); };
   $('#btnRebuild').onclick = () => { state.locked = false; refresh(); lockNote(''); toast('已按槽位重建'); };
   $('#btnClear').onclick = () => { state.slots[state.model] = {}; state.locked = false; save(); renderSlots(); refresh(); toast('已清空槽位'); };
   $('#btnSample').onclick = () => {
@@ -816,10 +1014,77 @@ function init() {
   $('#btnSave').onclick = () => {
     const t = $('#outText').value.trim(); if (!t) return toast('还没有内容');
     const m = modelByKey(state.model);
-    const title = (state.slots[m.key] && (state.slots[m.key][m.slots[1] ? m.slots[1].k : ''] || '')) || t.split('\n')[0].slice(0, 26);
-    state.favs.unshift({ title: String(title).slice(0, 30), text: t, model: m.name, at: Date.now() });
-    state.favs = state.favs.slice(0, 60); save(); renderFavs(); toast('已收藏');
+    const name = addFav(t, autoTitle(m, t), m);
+    if (name) toast('已存为词条：' + name + '（可在「我的库」改名）');
   };
+  // 我的库：一键把成品框内容存为词条
+  $('#btnMineFromOut').onclick = () => {
+    const t = $('#outText').value.trim(); if (!t) return toast('成品框还是空的');
+    const m = modelByKey(state.model);
+    const input = $('#mineTitle');
+    const name = addFav(t, input.value || autoTitle(m, t), m);
+    if (name) { input.value = ''; toast('已保存词条：' + name); }
+  };
+  $('#mineTitle').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#btnMineFromOut').click(); });
+  $('#btnMineAll').onclick = () => switchTab('mine');
+  $('#btnHist').onclick = () => { pushHistory(); switchTab('mine'); };
+  $('#mineQ').addEventListener('input', () => { state.mineQ = $('#mineQ').value; renderMine(); });
+  $('#histQ').addEventListener('input', () => { state.histQ = $('#histQ').value; renderHistory(); });
+  // 词条管理（事件委托）
+  $('#mineList').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    const d = b.dataset;
+    if (d.mins != null) return insertMine(+d.mins);
+    if (d.mload != null) return loadFavInto(state.favs[+d.mload]);
+    if (d.mcopy != null) return copyText(state.favs[+d.mcopy].text);
+    if (d.mren != null) {
+      const f = state.favs[+d.mren];
+      let n = null;
+      try { n = window.prompt('改个名字', f.title || ''); } catch (err) { n = f.title; }
+      if (n === null) return;
+      f.title = String(n).trim().slice(0, 40) || f.title; save(); renderFavs(); renderMine(); renderLibTabs(); renderChips();
+      return toast('已改名');
+    }
+    if (d.mdel != null) {
+      const f = state.favs[+d.mdel];
+      if (!window.confirm('删除词条「' + (f.title || oneLine(f.text, 20)) + '」？此操作不可撤销。')) return;
+      state.favs.splice(+d.mdel, 1); save(); renderFavs(); renderMine(); renderLibTabs(); renderChips(); renderMineMeta();
+      return toast('已删除');
+    }
+  });
+  // 历史管理（事件委托）
+  $('#histList').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    const d = b.dataset;
+    if (d.hload != null) return loadHistory(+d.hload);
+    if (d.hcopy != null) return copyText(state.history[+d.hcopy].text);
+    if (d.hfav != null) {
+      const e2 = state.history[+d.hfav], m = modelByKey(e2.mk) || modelByKey(state.model);
+      const name = addFav(e2.text, e2.title || autoTitle(m, e2.text), m);
+      return toast('已存为词条：' + name);
+    }
+    if (d.hdel != null) { state.history.splice(+d.hdel, 1); save(); renderHistory(); return; }
+  });
+  $('#btnHistClear').onclick = () => {
+    if (!state.history.length) return toast('历史已经是空的');
+    if (!window.confirm('清空 ' + state.history.length + ' 条生成历史？（词条不受影响）')) return;
+    state.history = []; save(); renderHistory(); renderMineMeta(); toast('历史已清空');
+  };
+  $('#btnMineClear').onclick = () => {
+    if (!state.favs.length) return toast('还没有词条');
+    if (!window.confirm('清空全部 ' + state.favs.length + ' 条词条？建议先「导出 JSON」备份。')) return;
+    state.favs = []; save(); renderFavs(); renderMine(); renderLibTabs(); renderChips(); renderMineMeta(); toast('词条已清空');
+  };
+  $('#btnMineExport').onclick = () => exportMy();
+  $('#btnMineCopyJson').onclick = () => copyText(JSON.stringify(myData(), null, 2));
+  $('#btnMineImport').onclick = () => $('#mineFile').click();
+  $('#mineFile').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { importMy(String(r.result || '')); e.target.value = ''; };
+    r.onerror = () => toast('读取文件失败');
+    r.readAsText(f);
+  });
   // 成品框：手动编辑
   $('#outText').addEventListener('input', () => { state.locked = true; lockNote('已手动编辑（不再自动同步）'); refresh(); });
   // 案例库
@@ -828,7 +1093,8 @@ function init() {
     el.addEventListener(ev, () => { caseState.page = 1; renderCases(); });
   });
   $('#btnMore').onclick = () => { caseState.page++; renderCases(); };
-  renderAll(); renderFavs(); renderTemplates(); renderRef(); refresh();
+  renderAll(); renderFavs(); renderMine(); renderHistory(); renderMineMeta(); renderTemplates(); renderRef(); refresh();
+  histArmed = true;   // 初始化时的默认文本不计入历史，之后的每次改动才记
   probeLocalImg().then(renderCases);
 }
 document.addEventListener('DOMContentLoaded', init);

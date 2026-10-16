@@ -28,6 +28,7 @@
     <button class="tab" data-tab="tpl">模板库</button>
     <button class="tab" data-tab="case">案例库 <em id="caseCount"></em></button>
     <button class="tab" data-tab="ref">速查手册</button>
+    <button class="tab" data-tab="mine">我的库 <em id="mineCount"></em></button>
     <button class="tab" data-tab="about">说明</button>
   </nav>
 </header>
@@ -66,19 +67,23 @@
           <div class="out-actions">
             <button class="btn primary" id="btnCopy">复制提示词</button>
             <button class="btn ghost" id="btnRebuild">从槽位重建</button>
-            <button class="btn ghost" id="btnSave">收藏</button>
+            <button class="btn ghost" id="btnSave">存为词条</button>
+            <button class="btn ghost" id="btnHist">历史</button>
             <span class="lock-hint" id="lockHint"></span>
           </div>
           <div class="issues" id="issues"></div>
         </div>
         <div class="card">
-          <h2 class="card-h">词库 <span class="hint">点击插入到当前焦点框</span></h2>
+          <h2 class="card-h">词库 <span class="hint">点击插入到当前焦点框 · 第一个标签是你自己存的</span></h2>
           <div class="lib-tabs" id="libTabs"></div>
           <div class="chips" id="libChips"></div>
         </div>
         <div class="card">
-          <h2 class="card-h">我的收藏 <span class="hint">存在本机浏览器</span></h2>
+          <h2 class="card-h">我的词条 <span class="hint">存在本机浏览器 · 可插入到光标处</span></h2>
           <div id="favList" class="fav-list"></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn ghost tiny" id="btnMineAll">管理全部 / 生成历史 →</button>
+          </div>
         </div>
       </div>
     </div>
@@ -132,6 +137,39 @@
     </div>
   </section>
 
+  <!-- ============ 我的库 ============ -->
+  <section class="panel" id="panel-mine">
+    <p class="lead">这里存的全是<b>你自己的东西</b>：手动保存的<b>词条</b>（同时出现在生成器右侧「词库 → 我的词条」，可一键插入到光标处），以及自动记录的<b>生成历史</b>（一键载回生成器继续改）。数据只存在本机浏览器 localStorage，不上传任何服务器；换电脑或换浏览器时用「导出 / 导入 JSON」搬过去。</p>
+    <div class="mine-grid">
+      <div class="card">
+        <h2 class="card-h">① 我的词条 <span class="hint" id="mineMeta"></span></h2>
+        <div class="mine-add">
+          <input id="mineTitle" class="input" placeholder="起个名字，例：我的清冷逆光尾串 / 客户A的服装词">
+          <button class="btn primary" id="btnMineFromOut">保存当前成品</button>
+        </div>
+        <div class="mine-add">
+          <input id="mineQ" class="input" type="search" placeholder="搜索我的词条（名称 / 正文）…">
+        </div>
+        <div id="mineList" class="fav-list tall"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn ghost tiny" id="btnMineExport">导出 JSON</button>
+          <button class="btn ghost tiny" id="btnMineImport">导入 JSON</button>
+          <button class="btn ghost tiny" id="btnMineCopyJson">复制 JSON</button>
+          <input id="mineFile" type="file" accept=".json,application/json" hidden>
+          <button class="btn ghost tiny danger" id="btnMineClear">清空词条</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-h">② 生成历史 <span class="hint" id="histMeta"></span></h2>
+        <div class="mine-add">
+          <input id="histQ" class="input" type="search" placeholder="搜索历史正文…">
+          <button class="btn ghost" id="btnHistClear">清空历史</button>
+        </div>
+        <div id="histList" class="fav-list tall"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ 说明 ============ -->
   <section class="panel" id="panel-about">
     <div class="card prose">
@@ -139,6 +177,7 @@
       <p>数据来自 krene.com 公开页面与公开接口的一次完整采集：首页推荐位 100 条 + 提示词库去重后 <b>806 条逐字原文</b>（含 GPT Image-2 326、Banana Pro 系 185、Niji 7 166、GPT Image 2.5 78、即梦 3.1 50），外加站方 8 篇官方教程的参数口径。</p>
       <p>生成器把《提示词规律总结》里的分模型槽位骨架、词频统计与《写作教程》的七步法、参数表、排错规则，做成可交互的自助工具：<b>填槽位 → 自动成稿 → 实时体检 → 复制到 Krene 出图</b>。</p>
       <p>体检规则完全来自案例统计出的反模式（质量词堆砌、中英无分隔、参数误用、文字没逐字给出、多格没写一致性、参考图没锁身份等），不是凭空规定的。</p>
+      <p><b>「我的库」是给你自己用的</b>：在生成器里把成品保存成<b>词条</b>后，它会出现在「词库 → 我的词条」里，以后任何模型、任何槽位都能一键插入到光标处；生成器每次停手 2 秒会自动记一条<b>生成历史</b>（最多 100 条，同文合并），历史可以一键载回生成器（槽位一起还原）或转存成词条。词条与历史都存在你自己浏览器的 localStorage 里，<b>本站不上传、也看不到</b>；换电脑/换浏览器用「导出 JSON」→「导入 JSON」搬过去即可（清空浏览器数据会一起清掉，重要内容记得导出备份）。</p>
       <p class="dim">注意：67 条 GPT Image-2 案例在站方原始数据里只存了 <code>$d1</code>/<code>$bf</code> 这类跨文件引用占位符，案例库中标记为「无正文」并给出原页链接，未做任何编造。本站为本地静态页面，数据不外传。</p>
       <h3 style="margin:18px 0 10px;font-size:14px">配套的三份完整报告</h3>
       <ul class="doclinks">
