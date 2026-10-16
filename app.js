@@ -43,14 +43,19 @@ const MODELS = [
       { k: 'genre', label: '画风 / 体裁', note: 'official anime key visual 等', ph: 'official anime key visual', lib: 'style' },
       { k: 'subject', label: '主体', note: '谁 / 什么', ph: '1 girl' },
       { k: 'look', label: '外貌细节', note: '3–5 项可画特征', ph: 'silver-white short bob hair, large blue eyes, fair skin', lib: 'appearance' },
+      { k: 'expression', label: '表情 / 情绪', note: '脸部的样子', ph: 'calm melancholic expression, slight smile', lib: 'mood' },
       { k: 'outfit', label: '服装', note: '分件写', ph: 'navy sailor school uniform, white shirt, red ribbon', lib: 'outfit' },
+      { k: 'accessories', label: '配饰', note: '眼镜 / 发饰 / 首饰', ph: 'silver hairpin, round glasses', lib: 'outfit' },
       { k: 'pose', label: '姿态动作', note: '定格瞬间', ph: 'looking back over her shoulder, paused mid-step', lib: 'action', multi: true },
+      { k: 'props', label: '道具', note: '手里拿的 / 身边的物件', ph: 'holding a clear plastic bottle of mineral water', lib: 'element', multi: true },
       { k: 'camera', label: '机位与构图', note: '景别+机位+构图', ph: 'full body, eye-level, centered composition', lib: 'shot' },
       { k: 'scene', label: '背景 / 环境', note: '白底就写 white background', ph: 'white background', lib: 'scene' },
       { k: 'element', label: '点缀元素', note: '可选', ph: 'falling cherry blossom petals', lib: 'element', multi: true },
       { k: 'light', label: '光线', note: '方向 + 性质', ph: 'soft rim light from the sunset', lib: 'light' },
       { k: 'color', label: '色彩', note: '色调 + 饱和度', ph: 'vibrant but soft colors', lib: 'color' },
-      { k: 'quality', label: '质量词', note: '最多 1–3 个', ph: 'clean lineart, cel shading', lib: 'quality', multi: true }
+      { k: 'mood', label: '氛围', note: '整体气质', ph: 'quiet, nostalgic atmosphere', lib: 'mood' },
+      { k: 'quality', label: '质量词', note: '最多 1–3 个', ph: 'clean lineart, cel shading', lib: 'quality', multi: true },
+      { k: 'extra', label: '其他 / 补充', note: '解析剩下的内容，也可自己写', multi: true }
     ],
     sample: {
       genre: 'official anime key visual', subject: '1 girl', look: 'silver-white short bob hair, large sparkling blue eyes, fair skin with soft blush, calm melancholic expression',
@@ -68,12 +73,20 @@ const MODELS = [
     tip: '中文分点式槽位说明（该模型 23% 的优质案例用分点体）。中文占 79%，不吃 -- 参数，可引用参考图。',
     slots: [
       { k: 'style', label: '画风总纲', note: '媒介 + 工艺', ph: '现代日系二次元写实插画，细腻柔和的清晰线稿，平涂叠加薄涂渐变', lib: 'style' },
+      { k: 'ref', label: '参考图与一致性', note: '用了参考图就先锁身份', ph: '参考图1的角色，保持五官、发型、服装与配饰完全一致，不要修改角色设计' },
       { k: 'subject', label: '主体', note: '身份 + 外貌分项', ph: '银白色短发的少女，琥珀色眼睛，白皙皮肤', multi: true },
+      { k: 'look', label: '外貌细节', note: '脸 / 发 / 瞳 / 身材', ph: '银白色短波波头，琥珀色眼睛，白皙皮肤，清瘦身形' },
+      { k: 'outfit', label: '服装配饰', note: '分件写材质', ph: '藏青色水手服上衣，白色衬衫，红色领结，单肩学生包' },
       { k: 'action', label: '动作姿态', note: '重心/肢体/视线/动静', ph: '重心前倾，单手扶住栏杆，视线望向画外，衣角被风吹起', multi: true },
       { k: 'camera', label: '镜头与构图', note: '景别 + 机位 + 留白', ph: '半身景别，平视机位，画面右侧大面积留白', lib: 'shot' },
-      { k: 'light', label: '光影色彩', note: '光源方向 + 阴影 + 色调', ph: '主光源来自画面左侧的柔和自然光，阴影边缘柔和；冷蓝与暖橙对比，低饱和' },
+      { k: 'scene', label: '背景场景', note: '环境 + 时间 + 天气', ph: '黄昏的校园走廊，远处是橙色天空与教学楼剪影' },
+      { k: 'light', label: '光影', note: '光源方向 + 阴影 + 对比', ph: '主光源来自画面左侧的柔和自然光，阴影边缘柔和；逆光形成轮廓光' },
+      { k: 'color', label: '色彩调性', note: '主色 + 饱和度', ph: '冷蓝与暖橙对比，低饱和莫兰迪色调', lib: 'color' },
+      { k: 'texts', label: '画面文字', note: '每个字都逐字给出', ph: '左上角竖排小字：“青春”' },
       { k: 'ratio', label: '画幅比例', note: '只写一次', ph: '9:16' },
-      { k: 'negative', label: '负面排除', note: '要简洁', ph: '无文字、无水印、无UI界面、无边框' }
+      { k: 'quality', label: '质量与参数', note: '1–3 个即可', ph: '8K 超清，电影级人像渲染，浅景深虚化背景' },
+      { k: 'negative', label: '负面排除', note: '要简洁', ph: '无文字、无水印、无UI界面、无边框' },
+      { k: 'extra', label: '其他要求', note: '解析剩下的内容，也可自己写', multi: true }
     ],
     sample: {
       style: '现代日系二次元写实插画，细腻柔和的清晰线稿，平涂叠加薄涂渐变',
@@ -94,10 +107,13 @@ const MODELS = [
       { k: 'canvas', label: '画布', note: '比例 + 色调 + 背景', ph: '竖版 9:16，柔和景深，夕阳轮廓光，粉色与金色调' },
       { k: 'layout', label: '布局', note: '元素怎么排、留白在哪', ph: '主体居中偏下，标题压在画面下三分之一，上方留出天空留白' },
       { k: 'detail', label: '主体细节', note: '逐项特征 + 材质', ph: '半身出镜的女高中生，银白色短波波头，宁静略带忧郁；藏青色水手服，红色领结', multi: true },
+      { k: 'light', label: '光影与色调', note: '光源 + 阴影 + 色温', ph: '夕阳从画面右后方打来，形成柔和轮廓光；粉色与金色调，整体中低饱和' },
       { k: 'texts', label: '文本内容', note: '一行一条，会自动编号', ph: '底部中央醒目的手写风格白色标题：“在那坡道上，樱花盛开时”', multi: true },
       { k: 'typo', label: '排版', note: '字体/字号层级/颜色', ph: '主标题手写风格白色大字，副标题小号居中，底部小字上车信息' },
       { k: 'visual', label: '视觉风格', note: '媒介 + 流派 + 配色', ph: '高品质现代日本动画电影海报风格，电影级调色，细腻花瓣' },
-      { k: 'limit', label: '限制条件', note: '只允许什么/严禁什么', ph: '画面仅包含一名主要角色、一个书包、一条红丝带；严禁额外角色、Logo、水印', multi: true }
+      { k: 'ref', label: '参考图与一致性', note: '多格 / 多版本时必写', ph: '全部格子保持角色脸部、发型、配色与服装一致，看不清处保守补全' },
+      { k: 'limit', label: '限制条件', note: '只允许什么/严禁什么', ph: '画面仅包含一名主要角色、一个书包、一条红丝带；严禁额外角色、Logo、水印', multi: true },
+      { k: 'extra', label: '其他要求', note: '解析剩下的内容，也可自己写', multi: true }
     ],
     sample: {
       purpose: '为职业网球选手的赛后战报制作一张社交媒体图',
@@ -121,7 +137,15 @@ const MODELS = [
       { k: 'target', label: '要用的新元素', note: '来自哪张图 / 新内容', ph: '图1的轮子设计' },
       { k: 'change', label: '画面中被改的部分', note: '旧元素 / 位置', ph: '图2摩托车的前后轮' },
       { k: 'keep', label: '其余保持不变', note: '防止连累', ph: '其余构图、光线、背景保持不变' },
-      { k: 'style', label: '风格', note: '画风 / 质感 / 光线', ph: '日系动画电影截图风格，赛璐璐平涂，暖橙色轮廓光' }
+      { k: 'style', label: '风格', note: '画风 / 质感 / 光线', ph: '日系动画电影截图风格，赛璐璐平涂，暖橙色轮廓光' },
+      { k: 'subject', label: '主体与外观', note: '人物 / 模型本体长什么样', ph: '二次元 3D 建模脸，真实皮肤质感，层次分明的发束' },
+      { k: 'outfit', label: '服装与装备', note: '服装 / 材质 / 配件', ph: '模块化机械外骨骼装甲，黑色科技风皮革' },
+      { k: 'scene', label: '场景与背景', note: '环境 / 地图 / 界面', ph: '游戏世界局内地图，可见地表纹理与植被' },
+      { k: 'light', label: '光影与氛围', note: '光源 / 阴影 / 环境光', ph: '逼真光影，柔和阴影，环境光遮蔽' },
+      { k: 'ratio', label: '画幅比例', note: '只写一次', ph: '16:9' },
+      { k: 'texts', label: '画面文字', note: '要渲染的字逐字给出', ph: '左上角标题：“春日限定”', multi: true },
+      { k: 'quality', label: '画质 / 材质与渲染', note: '清晰度 / 质感 / 颗粒', ph: '高分辨率，细节清晰，轻微胶片颗粒' },
+      { k: 'extra', label: '其他要求', note: '解析剩下的内容，也可自己写', multi: true }
     ],
     sample: {
       ref: '参考图1的人物，保持五官、发型与服装完全一致，不要修改角色设计',
@@ -137,13 +161,19 @@ const MODELS = [
     tip: '中文逗号链：短名词短语一路逗号连接。该模型不吃 -- 参数、不吃负面词、不吃权重括号（50 条案例无一例外）。',
     slots: [
       { k: 'subject', label: '主体 + 外貌', ph: '一位穿汉服的少女，乌黑长发，琥珀色眼睛', lib: 'appearance' },
+      { k: 'look', label: '外貌细节', ph: '乌黑长发，琥珀色眼睛，白皙皮肤' },
       { k: 'outfit', label: '服装', ph: '月白色交领长裙，外披薄纱', lib: 'outfit' },
       { k: 'pose', label: '动作姿态', ph: '立于石桥之上，侧身回望', lib: 'action' },
+      { k: 'expression', label: '表情 / 情绪', ph: '神情安静，略带笑意' },
       { k: 'scene', label: '环境背景', ph: '雨后的江南水乡，青石板路，白墙黛瓦', lib: 'scene' },
       { k: 'light', label: '光线', ph: '黄昏的柔和侧光，水面反光', lib: 'light' },
       { k: 'color', label: '色彩', ph: '低饱和度青灰色调，点缀暖橙', lib: 'color' },
       { k: 'mood', label: '氛围', ph: '静谧，清冷，故事感', lib: 'mood' },
-      { k: 'style', label: '风格媒介', ph: '写意水墨插画，工笔细节', lib: 'style' }
+      { k: 'style', label: '风格媒介', ph: '写意水墨插画，工笔细节', lib: 'style' },
+      { k: 'camera', label: '镜头视角', ph: '中景，平视，竖构图', lib: 'shot' },
+      { k: 'ratio', label: '画幅比例', ph: '竖版 3:4', lib: 'shot' },
+      { k: 'quality', label: '质量词', ph: '极致细节，超清', lib: 'quality' },
+      { k: 'extra', label: '其他 / 补充', note: '解析剩下的内容，也可自己写', multi: true }
     ],
     sample: {
       subject: '一位穿汉服的少女，乌黑长发，琥珀色眼睛', outfit: '月白色交领长裙，外披薄纱',
@@ -154,7 +184,14 @@ const MODELS = [
   }
 ];
 const modelByKey = (k) => MODELS.filter((m) => m.key === k)[0];
-const modelByName = (n) => MODELS.filter((m) => m.key === n || m.name === n)[0];
+/* 案例数据（data.js）里的模型名与生成器的模型名不完全一致，这里补齐映射，
+   否则「以它为基础」遇到 GPT Image 2.5 / Banana / 即梦 的案例会认不出模型 */
+const MODEL_ALIAS = {
+  'Niji 7': 'niji7', 'GPT Image-2': 'gpt2', 'GPT Image 2.5 Sunburst': 'gpt25',
+  'Banana Pro/Banana 2': 'banana', 'banana-pro-banana-2': 'banana', 'jimeng-3_1': 'jimeng',
+  'GPT Image 2.5': 'gpt25', 'Nano Banana / Pro': 'banana', '即梦 3.1': 'jimeng'
+};
+const modelByName = (n) => MODELS.filter((m) => m.key === n || m.name === n)[0] || modelByKey(MODEL_ALIAS[n] || '');
 const BADGE_OF = { 'Niji 7': 'm2', 'GPT Image-2': 'm0', 'GPT Image 2.5 Sunburst': 'm1', 'Banana Pro/Banana 2': 'm3', 'banana-pro-banana-2': 'm3', 'jimeng-3_1': 'm4' };
 
 /* ============================================================
@@ -326,6 +363,7 @@ const state = {
   params: { stylizeOn: true, stylize: 200, chaosOn: false, chaos: 20, raw: false, srefOn: false, sref: '', sw: 600, weirdOn: false, weird: 4, no: 'text, watermark, blur, bad hands' },
   favs: [],            // 我的词条：[{ title, text, model, at }]
   history: [],         // 生成历史：[{ at, model, mk, text, slots, params }]
+  custom: {},          // 自定义槽位：{ modelKey: [{ k, label }] }
   libTab: 'style',
   mineQ: '',
   histQ: '',
@@ -341,15 +379,21 @@ function load() {
     if (d.params) Object.assign(state.params, d.params);
     if (Array.isArray(d.favs)) state.favs = d.favs;
     if (Array.isArray(d.history)) state.history = d.history;
+    if (d.custom) state.custom = d.custom;
   } catch (e) { /* ignore */ }
 }
 function save() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
       model: state.model, slots: state.slots, params: state.params,
-      favs: state.favs, history: state.history
+      favs: state.favs, history: state.history, custom: state.custom
     }));
   } catch (e) { /* ignore */ }
+}
+/* 内置槽位 + 用户自定义槽位（顺序：内置在前，自定义追加在后） */
+function slotsOf(m) {
+  const c = (state.custom && state.custom[m.key]) || [];
+  return m.slots.concat(c.map((x) => ({ k: x.k, label: x.label, note: '自定义', ph: '', multi: true, custom: true })));
 }
 function slotVal(mk, sk) {
   const m = modelByKey(mk); const def = m.slots.filter((s) => s.k === sk)[0];
@@ -364,7 +408,7 @@ function setSlot(mk, sk, v) { if (!state.slots[mk]) state.slots[mk] = {}; state.
    6. 生成成品提示词
    ============================================================ */
 function buildNiji(m, params) {
-  const parts = m.slots.map((s) => slotVal('niji7', s.k).trim()).filter(Boolean)
+  const parts = slotsOf(m).map((s) => slotVal(m.key, s.k).trim()).filter(Boolean)
     .map((v) => v.replace(/\s*\n\s*/g, ', ').replace(/,\s*,/g, ',').replace(/^,|,$/g, '').trim())
     .filter(Boolean);
   let suffix = '--niji 7';
@@ -379,7 +423,7 @@ function buildNiji(m, params) {
 }
 function buildLines(m) {
   const out = [];
-  m.slots.forEach((s) => {
+  slotsOf(m).forEach((s) => {
     const v = slotVal(m.key, s.k).trim();
     if (!v) return;
     const lines = v.split('\n').map((x) => x.trim()).filter(Boolean);
@@ -390,18 +434,19 @@ function buildLines(m) {
 }
 function buildSpec(m) {
   const out = [];
-  const g = (k) => slotVal(m.key, k).trim();
-  if (g('purpose')) out.push('目的：' + g('purpose'));
-  if (g('canvas')) out.push('画布：' + g('canvas'));
-  if (g('layout')) out.push('布局：' + g('layout'));
-  if (g('detail')) out.push('主体细节：' + g('detail').split('\n').map((x) => x.trim()).filter(Boolean).join('\n'));
-  const texts = g('texts').split('\n').map((x) => x.trim()).filter(Boolean);
-  if (texts.length) {
-    out.push('文本内容：准确使用以下 ' + texts.length + ' 个可见文本元素：\n' + texts.map((t, i) => (i + 1) + ') ' + t).join('\n'));
-  }
-  if (g('typo')) out.push('排版：' + g('typo'));
-  if (g('visual')) out.push('视觉风格：' + g('visual'));
-  if (g('limit')) out.push('限制条件：' + g('limit'));
+  slotsOf(m).forEach((s) => {
+    const v = slotVal(m.key, s.k).trim();
+    if (!v) return;
+    if (s.k === 'texts') {
+      const ts = v.split('\n').map((x) => x.trim()).filter(Boolean);
+      out.push('文本内容：准确使用以下 ' + ts.length + ' 个可见文本元素：\n' + ts.map((t, i) => (i + 1) + ') ' + t).join('\n'));
+      return;
+    }
+    if (s.k === 'detail') { out.push(s.label + '：' + v.split('\n').map((x) => x.trim()).filter(Boolean).join('\n')); return; }
+    const lines = v.split('\n').map((x) => x.trim()).filter(Boolean);
+    if (s.multi && lines.length > 1) out.push(s.label + '：\n' + lines.map((x) => '- ' + x).join('\n'));
+    else out.push(s.label + '：' + lines.join(' '));
+  });
   return out.join('\n\n');
 }
 const VERB_TEXT = {
@@ -420,10 +465,16 @@ function buildEdit(m) {
   if (target || change) out.push('请' + VERB_TEXT[verb](target, change) + '。');
   if (g('keep')) out.push(g('keep') + '。');
   if (g('style')) out.push('风格：' + g('style') + '。');
+  if (g('quality')) out.push('画质与细节：' + g('quality') + '。');
+  if (g('extra')) out.push(g('extra') + '。');
+  (slotsOf(m).filter((s) => s.custom) || []).forEach((s) => {
+    const v = slotVal(m.key, s.k).trim();
+    if (v) out.push(s.label + '：' + v.replace(/\s*\n\s*/g, ' ') + '。');
+  });
   return out.join('\n');
 }
 function buildComma(m) {
-  return m.slots.map((s) => slotVal(m.key, s.k).trim()).filter(Boolean)
+  return slotsOf(m).map((s) => slotVal(m.key, s.k).trim()).filter(Boolean)
     .map((v) => v.replace(/\s*\n\s*/g, '，').replace(/，+/g, '，').replace(/^，|，$/g, ''))
     .join('，');
 }
@@ -435,6 +486,265 @@ function buildOutput() {
   if (m.syntax === 'edit') return buildEdit(m).trim();
   if (m.syntax === 'comma') return buildComma(m).trim();
   return '';
+}
+
+/* ============================================================
+   6.5 反向解析：把一段现成提示词拆回槽位
+   （标签命中优先，其次按词义打分归类，兜底进「其他」）
+   ============================================================ */
+const BUCKET_SLOTS = {
+  ref: ['ref', 'keep'], keep: ['keep', 'ref'], ratio: ['ratio', 'canvas'],
+  texts: ['texts', 'extra'], typo: ['typo', 'extra'],
+  light: ['light', 'visual', 'color', 'detail'], color: ['color', 'light', 'detail'],
+  camera: ['camera', 'detail'],
+  pose: ['pose', 'action', 'detail'], expression: ['expression', 'mood', 'look', 'subject'],
+  outfit: ['outfit', 'detail', 'subject'], accessories: ['accessories', 'outfit', 'detail', 'subject'],
+  look: ['look', 'subject', 'detail'], props: ['props', 'element', 'detail'],
+  scene: ['scene', 'canvas', 'detail'], mood: ['mood', 'detail', 'expression'],
+  quality: ['quality', 'limit', 'render', 'detail'], style: ['style', 'genre', 'visual', 'detail']
+};
+const LABEL_ALIAS = {
+  '画风': ['style', 'genre', 'visual'], '画风总纲': ['style', 'genre', 'visual'], '整体画风': ['style', 'genre', 'visual'],
+  '风格': ['style', 'genre', 'visual'], '艺术风格': ['style', 'genre', 'visual'], '媒介': ['style', 'genre', 'visual'],
+  'style': ['style', 'genre', 'visual'], 'art style': ['style', 'genre', 'visual'], 'medium': ['style', 'genre', 'visual'],
+  '视觉风格': ['visual', 'style', 'genre'], '画面风格': ['visual', 'style', 'genre'],
+  '参考图': ['ref', 'keep'], '参考图与一致性': ['ref', 'keep'], '参考图片': ['ref', 'keep'], '一致性': ['ref', 'keep'], 'reference': ['ref', 'keep'],
+  '保持': ['keep', 'ref'], '保持不变': ['keep', 'ref'], '其余保持不变': ['keep', 'ref'], 'keep': ['keep', 'ref'],
+  '主体': ['subject', 'detail'], '主体细节': ['subject', 'detail'], '角色': ['subject', 'detail'], '人物': ['subject', 'detail'],
+  '主体与外观': ['subject', 'look'], '对象': ['subject', 'detail'], '内容': ['subject', 'detail'], 'subject': ['subject', 'detail'], 'character': ['subject', 'detail'],
+  '外貌': ['look', 'subject'], '外貌细节': ['look', 'subject'], '特征': ['look', 'subject'], '长相': ['look', 'subject'],
+  '五官': ['look', 'subject'], '发型': ['look', 'subject'], 'appearance': ['look', 'subject'], 'look': ['look', 'subject'],
+  '表情': ['expression', 'mood', 'look'], '神情': ['expression', 'mood', 'look'], 'expression': ['expression', 'mood', 'look'],
+  '情绪': ['mood', 'expression'], '氛围': ['mood'], '氛围感': ['mood'], '气质': ['mood'], 'mood': ['mood'], 'atmosphere': ['mood'],
+  '服装': ['outfit'], '服装配饰': ['outfit'], '服装与装备': ['outfit'], '穿着': ['outfit'], '服饰': ['outfit'], '衣物': ['outfit'],
+  'outfit': ['outfit'], 'clothing': ['outfit'], '装备': ['outfit', 'props'],
+  '配饰': ['accessories', 'outfit'], '饰品': ['accessories', 'outfit'], '配件': ['accessories', 'outfit'],
+  '动作': ['pose', 'action'], '动作姿态': ['pose', 'action'], '姿态': ['pose', 'action'], '姿势': ['pose', 'action'],
+  'pose': ['pose', 'action'], 'action': ['pose', 'action'],
+  '道具': ['props', 'element'], '手持': ['props', 'element'], '物件': ['props', 'element'], 'props': ['props', 'element'],
+  '镜头': ['camera'], '镜头与构图': ['camera'], '镜头视角': ['camera'], '机位': ['camera'], '构图': ['camera'],
+  '景别': ['camera'], '视角': ['camera'], '拍摄': ['camera'], 'shot': ['camera'], 'camera': ['camera'], 'composition': ['camera'],
+  '背景': ['scene', 'canvas'], '背景场景': ['scene', 'canvas'], '环境': ['scene', 'canvas'], '环境背景': ['scene', 'canvas'],
+  '场景': ['scene', 'canvas'], '场景与背景': ['scene', 'canvas'], '地点': ['scene', 'canvas'], 'scene': ['scene', 'canvas'], 'background': ['scene', 'canvas'],
+  '光影': ['light'], '光影色彩': ['light'], '光影与色调': ['light'], '光影与氛围': ['light'], '光线': ['light'], '打光': ['light'],
+  '照明': ['light'], 'light': ['light'], 'lighting': ['light'],
+  '色彩': ['color', 'light'], '色彩调性': ['color', 'light'], '配色': ['color', 'light'], '色调': ['color', 'light'],
+  'color': ['color', 'light'], 'palette': ['color', 'light'],
+  '质量': ['quality', 'limit'], '质量词': ['quality', 'limit'], '质量与参数': ['quality', 'limit'], '画质': ['quality', 'limit'],
+  '画质与细节': ['quality', 'limit'], '画质 / 材质与渲染': ['quality', 'limit'], '材质': ['quality', 'limit'], '渲染': ['quality', 'limit'],
+  'quality': ['quality', 'limit'],
+  '文本内容': ['texts'], '文字': ['texts'], '画面文字': ['texts'], '标语': ['texts'], '标题': ['texts'], 'text': ['texts'], 'texts': ['texts'],
+  '排版': ['typo', 'extra'], '字体': ['typo', 'extra'], '字号': ['typo', 'extra'], 'typography': ['typo', 'extra'],
+  '画幅比例': ['ratio', 'canvas'], '比例': ['ratio', 'canvas'], '画幅': ['ratio', 'canvas'], '尺寸': ['ratio', 'canvas'],
+  '纵横比': ['ratio', 'canvas'], 'aspect': ['ratio', 'canvas'], 'ratio': ['ratio', 'canvas'],
+  '画布': ['canvas', 'ratio'], 'canvas': ['canvas', 'ratio'],
+  '布局': ['layout'], '位置': ['layout'], 'layout': ['layout'],
+  '目的': ['purpose'], '用途': ['purpose'], '场合': ['purpose'], 'purpose': ['purpose'],
+  '负面排除': ['negative', 'limit'], '负面': ['negative', 'limit'], '排除': ['negative', 'limit'],
+  '禁止': ['negative', 'limit'], '不要': ['negative', 'limit'], 'negative': ['negative', 'limit'],
+  '限制条件': ['limit', 'negative'], '限制': ['limit', 'negative'], '约束': ['limit', 'negative'],
+  'constraint': ['limit', 'negative'], 'limit': ['limit', 'negative'],
+  '编辑动作': ['verb'], '动作动词': ['verb'], 'verb': ['verb'],
+  '新元素': ['target'], '要用的新元素': ['target'], 'target': ['target'],
+  '被改的部分': ['change'], '画面中被改的部分': ['change'], '原元素': ['change'],
+  '其他': ['extra'], '其他要求': ['extra'], '补充': ['extra'], '额外': ['extra'], '备注': ['extra'], 'extra': ['extra'], 'other': ['extra']
+};
+const PARSE_HINTS = [
+  ['ref', /(参考图|参考图片|参考|参照|上传的图|上传的角色|原图|图一|图二|图1|图2|第1张|第2张|reference|參考圖|參考|原圖)/i],
+  ['keep', /(保持|保持不变|不变|一致|不要修改|严禁改变|维持|保留|不變|維持|keep|unchanged|consisten)/i],
+  ['ratio', /\d{1,2}\s*[:：]\s*\d{1,2}|竖版|横版|竖构图|横构图|方图|正方形|比例|画幅|尺寸|寬高比|宽高比|aspect/i],
+  ['texts', /(逐字|文字|标语|标题|字幕|台词|文案|logo|“|”|「|」|標語|標題|字幕|台詞)/],
+  ['typo', /(字体|字号|排版|版式|加粗|斜体|窄体|全大写|居中|杂志感|卡片式|handwritten|serif|sans|bold|italic|字體|雜誌|卡片)/i],
+  ['light', /(光线|光影|逆光|侧光|顺光|柔光|硬光|打光|照明|轮廓光|高光|阴影|光晕|丁达尔|光斑|光洒|自然光|灯光|light|lighting|glow|rim ?light|shadow|backlit|光線|陰影|輪廓光|燈光)/i],
+  ['color', /(色调|色彩|配色|饱和度|低饱和|高饱和|冷色|暖色|冷暖|莫兰迪|克莱因蓝|青灰|撞色|渐变|色系|palette|pastel|vibrant|saturat|monochrom|色調|飽和|冷調|暖調)/i],
+  ['camera', /(构图|镜头|机位|视角|景别|特写|近景|中景|半身|全身|全景|俯视|仰视|平视|俯拍|仰拍|广角|鱼眼|留白|三分|对称|对角线|景深|虚化|焦距|三视图|正视图|侧视图|背视图|四视图|设定图|设定稿|精灵表|精灵图|表情表|姿势表|分镜|分格|拼版|网格|\d+\s*mm|shot|camera|composition|framing|angle|portrait|full[- ]?body|close[- ]?up|bokeh|全身|上半身|バストアップ|立ち絵|構図|アングル|俯瞰|煽り|三視圖|正視圖|側視圖|背視圖|設定圖|精靈表)/i],
+  ['pose', /(站|坐|躺|跪|蹲|跑|走|跳|回望|望向|低头|抬头|转身|伸手|双手|单手|抱|举|扶|倚|撑|抬起|姿态|动作|pose|standing|sitting|lying|looking|holding|walking|leaning|立ち|座り|歩|振り向|見上げ|見下ろし|姿態|動作)/i],
+  ['expression', /(表情|神情|眼神|微笑|笑容|笑|哭|流泪|皱眉|怒|惊|闭眼|眨眼|smile|expression|frown|tears|笑顔|涙|目線|流淚)/i],
+  ['outfit', /(服|裙|衣|裤|裤|袜|鞋|靴|帽|领|袖|手套|围巾|制服|汉服|和服|校服|西装|外套|斗篷|披风|铠甲|uniform|dress|skirt|shirt|coat|hat|shoes|socks|jacket|kimono|制服|着物|浴衣|セーラー|ワンピース|コート|帽子|褲|襪|領|圍巾|披風|鎧甲|服裝|服飾)/i],
+  ['accessories', /(配饰|饰品|项链|耳环|戒指|眼镜|发饰|蝴蝶结|领结|项圈|accessor|necklace|earring|glasses|bow|眼鏡|ヘヤピン|リボン|配飾|項鍊|耳環|髮飾|蝴蝶結|領結)/i],
+  ['look', /(发|瞳|眼|肤|五官|脸|身材|长发|短发|双马尾|刘海|马尾|辫|白皙|hair|eyes|skin|face|bob|髪|瞳|肌|顔|ヘア|ツインテール|前髪|髮|膚|臉|長髮|短髮|瀏海|髮型|皮膚)/i],
+  ['props', /(手持|拿着|握着|举着|捧着|背着|道具|伞|包|书|花束|杯子|瓶|剑|刀|相机|吉他|魔杖|气球|手机|prop|umbrella|sword|katana|gun|rifle|book|bag|剣|刀|傘|本|拿|書|劍|相機|氣球|手機)/i],
+  ['scene', /(背景|环境|场景|天空|街道|室内|室外|教室|走廊|屋顶|海边|沙滩|森林|山|水|雨|雪|樱花|夜晚|黄昏|清晨|便利店|水乡|房间|background|scene|indoors|outdoors|street|room|sky|forest|beach|snow|rain|空|街|部屋|海|森|夜|桜|場景|環境|室內|室外|屋頂|海邊|沙灘|櫻花|黃昏|房間)/i],
+  ['mood', /(氛围|氛围感|气质|梦幻|治愈|清冷|神秘|慵懒|静谧|电影感|故事感|高级感|宿命|压抑|温暖|温柔|清新|mood|atmosphere|dreamy|cinematic|serene|nostalgic|氛圍|氣質|夢幻|治癒|神秘|靜謐|電影感|故事感|高級感|溫柔)/i],
+  ['quality', /(8k|4k|超清|超高清|高清|极致细节|细节丰富|细腻|精致|杰作|大师|完美|清晰|干净|clean|lineart|detailed|sharp|texture|best quality|masterpiece|highres|ultra[- ]?detailed|render|材质|渲染|质感|纹理|反射|建模|pbr|normal map|roughness|metallic|ambient occlusion|subsurface|specular|global illumination|hard[- ]?surface|高画質|最高画質|精細|ディテール|高解像度|高品質|高解析|細節|質感|筆觸|線條|乾淨|精緻|傑作|渲染|材質|紋理|高畫質)/i],
+  ['style', /(画风|风格|插画|厚涂|平涂|赛璐璐|水彩|水墨|油画|丙烯|工笔|写意|像素|3d|二次元|日系|国风|古风|浮世绘|新海诚|wlop|illustration|anime style|cel shading|watercolor|impasto|pixel art|flat color|イラスト|アニメ|水彩|厚塗り|線画|ちび|レトロ|風格|插畫|厚塗|水彩|水墨|油畫|像素|動漫|國風|古風|塗鴉|手繪|韓系|美妝|雜誌|海報|蠟筆|素描|立體|寫實|寫意|簡筆)/i]
+];
+function normLabel(s) { return (s || '').replace(/^[-*•·\s]+/, '').replace(/[\s：:]+$/, '').replace(/\s+/g, '').toLowerCase(); }
+function pickSlot(cands, keys) { for (let i = 0; i < cands.length; i++) { if (keys.indexOf(cands[i]) >= 0) return cands[i]; } return ''; }
+function scoreBucket(frag) {
+  let best = '', bestN = 0;
+  for (let i = 0; i < PARSE_HINTS.length; i++) {
+    const mm = frag.match(new RegExp(PARSE_HINTS[i][1].source, 'gi'));
+    const n = mm ? mm.length : 0;
+    if (n > bestN) { bestN = n; best = PARSE_HINTS[i][0]; }
+  }
+  return best;
+}
+function verbOf(v) {
+  if (/替换|replace/i.test(v)) return 'replace';
+  if (/改为|改成|变成|change/i.test(v)) return 'change';
+  if (/添加|加上|增加|add/i.test(v)) return 'add';
+  if (/移除|删掉|去掉|remove/i.test(v)) return 'remove';
+  if (/使|让|make/i.test(v)) return 'make';
+  return 'change';
+}
+function extractNijiParams(t) {
+  const p = {}; let n = 0, rest = t;
+  const take = (re, fn) => { const mm = rest.match(re); if (mm) { fn(mm); rest = rest.replace(re, ' '); n++; } };
+  take(/--stylize\s+(\d+)/i, (mm) => { p.stylizeOn = true; p.stylize = +mm[1]; });
+  take(/--s\s+(\d+)/i, (mm) => { p.stylizeOn = true; p.stylize = +mm[1]; });
+  take(/--chaos\s+(\d+)/i, (mm) => { p.chaosOn = true; p.chaos = +mm[1]; });
+  take(/--c\s+(\d+)/i, (mm) => { p.chaosOn = true; p.chaos = +mm[1]; });
+  take(/--style\s+raw/i, () => { p.raw = true; });
+  take(/--raw\b/i, () => { p.raw = true; });
+  take(/--sw\s+(\d+)/i, (mm) => { p.sw = +mm[1]; });
+  take(/--sref\s+([\d\s:]+)/i, (mm) => { p.srefOn = true; p.sref = mm[1].trim(); });
+  take(/--weird\s+(\d+)/i, (mm) => { p.weirdOn = true; p.weird = +mm[1]; });
+  take(/--w\s+(\d+)/i, (mm) => { p.weirdOn = true; p.weird = +mm[1]; });
+  take(/--no\s+([^-\n]+)/i, (mm) => { p.no = mm[1].trim().replace(/[,\s]+$/, ''); });
+  take(/--niji\s*\d*/i, () => {});
+  return { rest: rest.replace(/\s{2,}/g, ' ').trim(), p, n };
+}
+/* 把一段提示词拆回槽位；返回 { n, filled, extraN, params } */
+function parseToSlots(text, mk) {
+  const m = modelByKey(mk);
+  let t = (text || '').trim();
+  if (!t) return { n: 0, filled: [], extraN: 0, params: 0 };
+  const keys = slotsOf(m).map((s) => s.k);
+  const has = (k) => keys.indexOf(k) >= 0;
+  let params = 0;
+  if (m.params) { const ex = extractNijiParams(t); if (ex.n) { t = ex.rest; params = ex.n; Object.assign(state.params, ex.p); } }
+  const lines = t.split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+  const blocks = [];
+  lines.forEach((ln) => {
+    const mm = ln.match(/^([^\s：:]{1,16})\s*[：:]\s*(.*)$/);
+    const lab = mm ? normLabel(mm[1]) : '';
+    if (mm && LABEL_ALIAS[lab]) blocks.push({ label: lab, value: mm[2].trim() });
+    else if (blocks.length && blocks[blocks.length - 1].label) blocks[blocks.length - 1].value += '\n' + ln.replace(/^[-*•·]\s*/, '');
+    else blocks.push({ label: '', value: ln.replace(/^[-*•·]\s*/, '') });
+  });
+  const merged = [];
+  blocks.forEach((b) => {
+    if (!b.label && merged.length && !merged[merged.length - 1].label) merged[merged.length - 1].value += '\n' + b.value;
+    else merged.push({ label: b.label, value: b.value });
+  });
+  const fresh = {}; const filled = []; let extraN = 0;
+  const put = (k, v) => {
+    v = (v || '').trim().replace(/^[，,、;；\s]+|[，,、;；\s]+$/g, '');
+    if (!v) return;
+    const sep = (m.syntax === 'tags' || m.syntax === 'comma') ? '，' : '\n';
+    fresh[k] = fresh[k] ? fresh[k] + sep + v : v;
+    if (filled.indexOf(k) < 0) filled.push(k);
+  };
+  /* 编辑句式预判：把X改成Y / 将X替换成Y / 在X添加Y → 编辑动作 + 被改部分 + 新元素。
+     注意「转换成」必须排在「换成」前面，否则会被从中间切开 */
+  if (has('target') || has('change')) {
+    const EDIT_RE = /(?:请|請|帮|幫)?\s*(?:把|将|將)?\s*([^，。；;、\n]{1,40}?)\s*(替换成为|替换为|替换成|替换|转换成为|转换成|转换为|转为|转化为|改为|改成|换成|变成|添加|加上|增加|移除|删掉|去掉|套用|应用于|翻译为|翻译成|翻译|上色|补全|重绘|替換成為|替換為|替換成|替換|轉換成為|轉換成|轉換為|轉為|轉化為|改為|改成|換成|變成|添加|加上|增加|移除|刪掉|去掉|套用|應用於|翻譯為|翻譯成|翻譯|上色|補全|重繪)\s*([^，。；;\n]{1,45})/;
+    const clean = (s) => (s || '').replace(/^[\s"'“”‘’「」【】-]+/, '').replace(/^[把将请]\s*/, '').replace(/[\s"'“”‘’」】]+$/, '').trim();
+    merged.forEach((b) => {
+      if (b.label) return;
+      const mm = b.value.replace(/^[\s"'“”‘’]+/, '').match(EDIT_RE);
+      if (!mm) return;
+      if (has('verb')) put('verb', verbOf(mm[2]));
+      if (has('change')) put('change', clean(mm[1]));
+      if (has('target')) put('target', clean(mm[3]));
+      b.value = b.value.replace(mm[0], ' ').trim();
+    });
+  }
+  /* 片段切分：逗号/顿号/分号/换行都算分界；以 and / with / wearing 这类连词开头的片段
+     是上一句的续写（英文长句提示词很常见），并回上一段，避免被拆成半句乱归类 */
+  const CONT_RE = /^(and|with|in|on|of|at|plus|while|wearing|holding|standing|sitting|resting|carrying|along)\b/i;
+  const fragsOf = (value) => {
+    const raw = value.split(/[，,、；;\n]+/)
+      .map((x) => x.replace(/^[-*•·]\s*/, '').replace(/^\(|\)$/g, '').trim()).filter(Boolean);
+    const out = [];
+    raw.forEach((f) => {
+      if (out.length && CONT_RE.test(f)) out[out.length - 1] += '，' + f;
+      else out.push(f);
+    });
+    return out;
+  };
+  /* 主体预判：无标签内容里，第一段「自己归不了类」的短语往往就是主体
+     （Michiru Saotome from Getter Robo / 1girl / 一位穿汉服的少女）；
+     都不符合时再退回到人物名词匹配 */
+  const SUBJ_RE = /(少女|少年|女孩|男孩|女性|男性|人物|角色|主角|女王|公主|武士|战士|骑士|猫|狗|鸟|兔|机甲|机器人|肖像|girl|boy|woman|man|character|warrior|knight|robot)/i;
+  if (has('subject') && !fresh.subject) {
+    let hit = '';
+    for (let bi = 0; bi < merged.length && !hit; bi++) {
+      const b = merged[bi];
+      if (b.label) continue;
+      const frs = fragsOf(b.value);
+      for (let fi = 0; fi < frs.length; fi++) {
+        if (!scoreBucket(frs[fi]) && frs[fi].length <= 60) { hit = frs[fi]; frs[fi] = ''; break; }
+      }
+      if (hit) b.value = frs.filter(Boolean).join('，');
+    }
+    if (!hit) {
+      for (let bi = 0; bi < merged.length && !hit; bi++) {
+        const b = merged[bi];
+        if (b.label) continue;
+        const frs = fragsOf(b.value);
+        for (let fi = 0; fi < frs.length; fi++) {
+          const bb = scoreBucket(frs[fi]);
+          /* 只排除「结构性」的句子（参考图 / 保持条件 / 比例 / 文字），
+             像「一位穿汉服的少女」这种含服装词但其实是主体的句子要保留 */
+          if (bb === 'ref' || bb === 'keep' || bb === 'ratio' || bb === 'texts' || bb === 'negative') continue;
+          if (SUBJ_RE.test(frs[fi]) && frs[fi].length <= 60) { hit = frs[fi]; frs[fi] = ''; break; }
+        }
+        if (hit) b.value = frs.filter(Boolean).join('，');
+      }
+    }
+    if (hit) put('subject', hit);
+  }
+  merged.forEach((b) => {
+    if (b.label) {
+      const k = pickSlot(LABEL_ALIAS[b.label], keys);
+      const parts = b.value.split('\n');
+      parts.forEach((ln, i) => {
+        const s = ln.trim();
+        if (!s) return;
+        if (i === 0) { if (k) put(k, k === 'verb' ? verbOf(s) : s); return; }
+        /* 标签段落里的后续行：能自己归类就归到别的槽位（例：分点式里混进来的一行参考图要求） */
+        const bucket = scoreBucket(s);
+        const k2 = bucket ? pickSlot(BUCKET_SLOTS[bucket], keys) : '';
+        if (k2 && k2 !== k) put(k2, s.replace(/^[-*•·]\s*/, ''));
+        else if (k) put(k, s.replace(/^[-*•·]\s*/, ''));
+      });
+      return;
+    }
+    fragsOf(b.value).forEach((frag) => {
+      const bucket = scoreBucket(frag);
+      let k = bucket ? pickSlot(BUCKET_SLOTS[bucket], keys) : '';
+      if (!k) k = has('subject') && !fresh.subject ? 'subject' : (has('extra') ? 'extra' : keys[keys.length - 1]);
+      if (k === 'extra') extraN++;
+      put(k, frag);
+    });
+  });
+  if (!filled.length) return { n: 0, filled: [], extraN: 0, params };
+  state.slots[mk] = fresh;
+  return { n: filled.length, filled, extraN, params };
+}
+function slotLabel(m, k) { const s = slotsOf(m).filter((x) => x.k === k)[0]; return s ? s.label : k; }
+/* 把成品框里的内容解析到槽位（auto=true 时来自粘贴，原文保留在成品框） */
+function parseFromOut() {
+  const m = modelByKey(state.model);
+  const box = $('#outText');
+  const txt = box.value || '';
+  if (!txt.trim()) { toast('成品框是空的，先把提示词粘进来'); return; }
+  const keep = txt;
+  const r = parseToSlots(txt, state.model);
+  if (!r.n) { toast('没有认出可拆的内容，已保留原文'); return; }
+  state.locked = true;
+  save(); renderSlots(); renderParams(); refresh();
+  box.value = keep;
+  const names = r.filled.filter((k) => k !== 'extra').map((k) => slotLabel(m, k));
+  if ($('#lockHint')) {
+    $('#lockHint').textContent = '已解析到槽位：' + (names.join('、') || '（都在「其他」里）')
+      + (r.extraN ? '；另有 ' + r.extraN + ' 段进了「其他」' : '')
+      + (r.params ? '；识别到 ' + r.params + ' 个后缀参数已填参数面板' : '')
+      + ' · 点「从槽位重建」可按槽位重排输出';
+  }
+  toast('已把内容拆进 ' + r.filled.length + ' 个槽位，原文保留在上方');
 }
 
 /* ============================================================
@@ -513,7 +823,7 @@ function renderModelPicker() {
 }
 function renderSlots() {
   const m = modelByKey(state.model);
-  $('#slotForm').innerHTML = m.slots.map((s) => {
+  $('#slotForm').innerHTML = slotsOf(m).map((s) => {
     const v = slotVal(m.key, s.k);
     let field;
     if (s.type === 'select') {
@@ -523,12 +833,33 @@ function renderSlots() {
     } else {
       field = '<input type="text" data-k="' + s.k + '" placeholder="' + esc(s.ph) + '" value="' + esc(v) + '">';
     }
-    return '<div class="slot"><label><b>' + esc(s.label) + '</b><i>' + esc(s.note || '') + '</i></label><div class="field">' + field + '</div></div>';
+    return '<div class="slot' + (s.custom ? ' custom' : '') + '"><label><b>' + esc(s.label) + '</b><i>' + esc(s.note || '') + '</i></label><div class="field">' + field
+      + (s.custom ? '<button class="delk" data-delk="' + esc(s.k) + '" title="删除这个自定义槽位">×</button>' : '') + '</div></div>';
   }).join('');
+  const cnt = (state.custom && state.custom[m.key] || []).length;
+  if ($('#slotCount')) $('#slotCount').textContent = slotsOf(m).length + ' 个槽位' + (cnt ? '（含 ' + cnt + ' 个自定义）' : '');
   $$('#slotForm [data-k]').forEach((el) => {
     const ev = el.tagName === 'SELECT' ? 'change' : 'input';
     el.addEventListener(ev, () => { setSlot(m.key, el.dataset.k, el.value); state.locked = false; save(); refresh(); });
   });
+  $$('#slotForm [data-delk]').forEach((el) => {
+    el.addEventListener('click', () => delCustomSlot(m.key, el.dataset.delk));
+  });
+}
+function addCustomSlot() {
+  const m = modelByKey(state.model);
+  const name = (window.prompt('新槽位名称（例如：镜头参数 / 参考图 / 版本备注）', '') || '').trim();
+  if (!name) return;
+  if (!state.custom[m.key]) state.custom[m.key] = [];
+  state.custom[m.key].push({ k: 'x' + Date.now().toString(36) + Math.floor(Math.random() * 99), label: name.slice(0, 20) });
+  save(); renderSlots(); refresh();
+  toast('已添加槽位「' + name.slice(0, 20) + '」');
+}
+function delCustomSlot(mk, k) {
+  const list = (state.custom[mk] || []).filter((x) => x.k !== k);
+  state.custom[mk] = list;
+  if (state.slots[mk]) delete state.slots[mk][k];
+  save(); renderSlots(); refresh();
 }
 function renderParams() {
   const p = state.params;
@@ -663,9 +994,10 @@ function loadFavInto(f) {
   if (!f) return;
   const mm = modelByName(f.model);
   if (mm) state.model = mm.key;
-  state.locked = true; renderAll(); $('#outText').value = f.text; refresh();
-  lockNote('已载入词条（手动模式，改回槽位请点「从槽位重建」）');
-  switchTab('gen'); toast('已载入词条');
+  const res = parseToSlots(f.text, state.model);
+  state.locked = true; renderAll(); renderSlots(); refresh(); $('#outText').value = f.text;
+  lockNote(res.n ? '已载入词条，并自动拆进 ' + res.n + ' 个槽位（可逐格改，点「从槽位重建」重排）' : '已载入词条（手动模式，改回槽位请点「解析到槽位」）');
+  switchTab('gen'); toast(res.n ? '已载入词条并拆进 ' + res.n + ' 个槽位' : '已载入词条');
 }
 function renderFavs() {
   if (!state.favs.length) {
@@ -780,14 +1112,16 @@ function pushHistory(force) {
 function loadHistory(i) {
   const e = state.history[i]; if (!e) return;
   const mm = modelByKey(e.mk) || modelByName(e.model);
+  let n = 0;
   if (mm) {
     state.model = mm.key;
     if (e.slots) state.slots[mm.key] = JSON.parse(JSON.stringify(e.slots));
+    else n = parseToSlots(e.text, mm.key).n;
     if (e.params && mm.syntax === 'tags') Object.assign(state.params, e.params);
   }
-  state.locked = true; renderAll();
+  state.locked = true; renderAll(); renderSlots(); renderParams(); refresh();
   $('#outText').value = e.text; refresh();
-  lockNote('已载入历史（槽位一起还原，手动模式）');
+  lockNote(e.slots ? '已载入历史（槽位一起还原，手动模式）' : (n ? '已载入历史，并按内容拆进 ' + n + ' 个槽位' : '已载入历史（手动模式）'));
   switchTab('gen'); toast('已载入这条历史');
 }
 // ---- 导出 / 导入 ----
@@ -917,8 +1251,12 @@ function renderCases() {
     const r = KRENE_CASES[+b.dataset.base]; const mm = modelByName(r[1]);
     if (mm) state.model = mm.key;
     renderAll(); switchTab('gen');
-    $('#outText').value = r[2]; state.locked = true; refresh();
-    lockNote('已载入案例（手动模式）：改完再复制');
+    const src = r[2] || '';
+    const res = parseToSlots(src, state.model);
+    state.locked = true; save(); renderSlots(); renderParams(); refresh();
+    $('#outText').value = src;
+    lockNote(res.n ? '已载入案例，并自动拆进 ' + res.n + ' 个槽位：逐格改就行，点「从槽位重建」按槽位重排' : '已载入案例（手动模式）：改完再复制');
+    toast(res.n ? '已拆进 ' + res.n + ' 个槽位，可直接逐格改' : '已载入案例');
   });
   $$('#caseList [data-shot], #caseList [data-shot2]').forEach((b) => b.onclick = () => openShot(+(b.dataset.shot || b.dataset.shot2)));
 }
@@ -997,6 +1335,8 @@ function init() {
   // 生成器按钮
   $('#btnCopy').onclick = () => { const t = $('#outText').value.trim(); if (!t) return toast('还没有内容'); copyText(t); pushHistory(true); };
   $('#btnRebuild').onclick = () => { state.locked = false; refresh(); lockNote(''); toast('已按槽位重建'); };
+  $('#btnParse').onclick = () => parseFromOut();
+  $('#btnAddSlot').onclick = () => addCustomSlot();
   $('#btnClear').onclick = () => { state.slots[state.model] = {}; state.locked = false; save(); renderSlots(); refresh(); toast('已清空槽位'); };
   $('#btnSample').onclick = () => {
     const m = modelByKey(state.model); state.slots[m.key] = Object.assign({}, m.sample);
@@ -1087,6 +1427,8 @@ function init() {
   });
   // 成品框：手动编辑
   $('#outText').addEventListener('input', () => { state.locked = true; lockNote('已手动编辑（不再自动同步）'); refresh(); });
+  // 成品框：粘贴即自动拆到槽位（原文保留，可再手改）
+  $('#outText').addEventListener('paste', () => setTimeout(() => parseFromOut(), 30));
   // 案例库
   ['#q', '#fModel', '#fColl', '#fSort', '#fFeat', '#fFull'].forEach((s) => {
     const el = $(s); const ev = el.tagName === 'INPUT' && el.type === 'search' ? 'input' : 'change';
@@ -1098,4 +1440,12 @@ function init() {
   probeLocalImg().then(renderCases);
 }
 document.addEventListener('DOMContentLoaded', init);
+/* 测试钩子：暴露内部状态，供自动化测试用（不影响正常使用） */
+window.__k = {
+  get state() { return state; },
+  MODELS: MODELS, LIB: LIB, slotsOf: slotsOf, parseToSlots: parseToSlots, parseFromOut: parseFromOut,
+  modelByName: modelByName, modelByKey: modelByKey,
+  buildOutput: buildOutput, buildNiji: buildNiji, check: check, refresh: refresh,
+  renderAll: renderAll, renderSlots: renderSlots, renderCases: renderCases, switchTab: switchTab
+};
 })();

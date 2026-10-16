@@ -76,6 +76,14 @@ main{max-width:1420px;margin:0 auto;padding:22px}
 .slot input:focus,.slot textarea:focus,.slot select:focus{border-color:var(--acc);box-shadow:0 0 0 2px #e8b04b22}
 .slot textarea{min-height:64px;line-height:1.6}
 .slot-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.slot.custom{background:#e8b04b08;border-radius:10px;padding:8px 8px 8px 0;box-shadow:inset 3px 0 0 #e8b04b55}
+.slot .field{position:relative}
+.slot .delk{
+  position:absolute;top:-7px;right:-7px;width:20px;height:20px;line-height:17px;padding:0;border-radius:50%;
+  background:#1b2027;color:var(--dim);border:1px solid var(--line);font-size:13px;cursor:pointer;
+}
+.slot .delk:hover{color:#fff;background:#b3433f;border-color:#b3433f}
+.hint.small{display:block;margin:10px 0 0;line-height:1.6}
 
 /* ---------- 按钮 ---------- */
 .btn{border-radius:9px;padding:8px 14px;cursor:pointer;border:1px solid var(--line2);background:var(--card2);transition:.15s}

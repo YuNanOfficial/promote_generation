@@ -44,13 +44,15 @@
           <p class="model-tip" id="modelTip"></p>
         </div>
         <div class="card">
-          <h2 class="card-h">② 填槽位 <span class="hint">点右侧词库可插入到光标处</span></h2>
+          <h2 class="card-h">② 填槽位 <span class="hint"><span id="slotCount"></span> · 点右侧词库可插入到光标处</span></h2>
           <div id="slotForm" class="slot-form"></div>
           <div class="slot-actions">
             <button class="btn ghost" id="btnSample">填充示例</button>
             <button class="btn ghost" id="btnRandom">随机灵感</button>
+            <button class="btn ghost" id="btnAddSlot" title="给自己常写的部分留一格，例如「镜头参数」「参考图」「版本备注」">+ 自定义槽位</button>
             <button class="btn ghost danger" id="btnClear">清空</button>
           </div>
+          <p class="hint small">槽位不用全填；粘贴提示词到右边会自动拆进来，任何一格都能自己改文字。自定义槽位只存在你自己的浏览器里。</p>
         </div>
         <div class="card" id="paramCard">
           <h2 class="card-h">③ 参数（Niji 7 专属）</h2>
@@ -63,9 +65,10 @@
           <h2 class="card-h">④ 成品提示词
             <span class="hint" id="outMeta"></span>
           </h2>
-          <textarea id="outText" spellcheck="false" placeholder="左侧填槽位会自动生成；也可直接在这里手写/粘贴。"></textarea>
+          <textarea id="outText" spellcheck="false" placeholder="左侧填槽位会自动生成；直接粘贴一段现成提示词，也会自动拆进左边槽位。"></textarea>
           <div class="out-actions">
             <button class="btn primary" id="btnCopy">复制提示词</button>
+            <button class="btn ghost" id="btnParse" title="把这里的提示词按内容自动拆到左边槽位">解析到槽位</button>
             <button class="btn ghost" id="btnRebuild">从槽位重建</button>
             <button class="btn ghost" id="btnSave">存为词条</button>
             <button class="btn ghost" id="btnHist">历史</button>
@@ -178,6 +181,15 @@
       <p>生成器把《提示词规律总结》里的分模型槽位骨架、词频统计与《写作教程》的七步法、参数表、排错规则，做成可交互的自助工具：<b>填槽位 → 自动成稿 → 实时体检 → 复制到 Krene 出图</b>。</p>
       <p>体检规则完全来自案例统计出的反模式（质量词堆砌、中英无分隔、参数误用、文字没逐字给出、多格没写一致性、参考图没锁身份等），不是凭空规定的。</p>
       <p><b>「我的库」是给你自己用的</b>：在生成器里把成品保存成<b>词条</b>后，它会出现在「词库 → 我的词条」里，以后任何模型、任何槽位都能一键插入到光标处；生成器每次停手 2 秒会自动记一条<b>生成历史</b>（最多 100 条，同文合并），历史可以一键载回生成器（槽位一起还原）或转存成词条。词条与历史都存在你自己浏览器的 localStorage 里，<b>本站不上传、也看不到</b>；换电脑/换浏览器用「导出 JSON」→「导入 JSON」搬过去即可（清空浏览器数据会一起清掉，重要内容记得导出备份）。</p>
+      <h3 style="margin:18px 0 10px;font-size:14px">已经有提示词了？不用一个字一个字抄</h3>
+      <p>把任何一段现成提示词（群里抄的、别人的案例、你自己以前写的）整段粘到生成器右下角的大文本框，然后：</p>
+      <ul>
+        <li><b>「解析到槽位」</b>（或直接在文本框里 <code>Ctrl+V</code>，粘贴即自动解析）——它会按内容把整段文字拆进左边的槽位：主体进主体、<b>镜头/景别/三视图</b>进机位、<b>光与影</b>进光线、色调进色彩、比例（<code>9:16</code>、<code>竖版</code>）进画幅、<code>--stylize 400</code> 这类后缀还会自动勾上参数开关。拆完会告诉你「填入 N 格」。</li>
+        <li><b>案例卡上点「以它为基础」</b>——把案例库里的提示词连同它的模型一起载入，同样是自动拆好槽位，你只改想改的那几格，再点「从槽位重建」重新成稿。</li>
+        <li><b>拆不干净是正常的</b>：没被识别的部分会原样落到「其他 / 补充」槽里，一个字都不会丢——那一格就是兜底，你看着归位或直接留着都行。</li>
+        <li><b>每行「标签：内容」会被优先识别</b>（例如 <code>光影色彩：主光源来自画面左侧</code>、<code>Lighting: soft rim light</code>），所以长结构提示词拆得最准；机型名、品牌名这类专有词不要硬拆，放兜底格即可。</li>
+        <li><b>「+ 自定义槽位」</b>：五个模型各有 11–16 个预置槽位（Niji 7 最细，外加「配饰」「点缀元素」等），想要更多就自己加一格，例如「镜头参数」「角色版本备注」；自定义格同样参与成稿与体检，存在本地。</li>
+      </ul>
       <p class="dim">注意：67 条 GPT Image-2 案例在站方原始数据里只存了 <code>$d1</code>/<code>$bf</code> 这类跨文件引用占位符，案例库中标记为「无正文」并给出原页链接，未做任何编造。本站为本地静态页面，数据不外传。</p>
       <h3 style="margin:18px 0 10px;font-size:14px">配套的三份完整报告</h3>
       <ul class="doclinks">
